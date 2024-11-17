@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zadanka</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Czerń */
+            color: #FFFFFF; /* Biały tekst */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1A1A1A; /* Ciemny szary */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+            border: 1px solid #333333; /* Ciemniejsza granica */
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #B3B3B3; /* Jasny szary */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid #333333; /* Ciemniejsza granica */
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            font-weight: bold;
+            color: #FFFFFF; /* Biały tekst */
+            text-transform: uppercase;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .tab.active {
+            background: #FFFFFF; /* Białe tło */
+            color: #000000; /* Czarny tekst */
+        }
+
+        .tab:hover {
+            background: #555555; /* Szary */
+            color: #FFFFFF; /* Biały tekst */
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-container, ul, .categories {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="time"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333333; /* Ciemniejsza granica */
+            border-radius: 4px;
+            background: #1A1A1A; /* Ciemny szary */
+            color: #FFFFFF; /* Biały tekst */
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #2C2C2C; /* Ciemny szary */
+            color: #FFFFFF; /* Biały tekst */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #555555; /* Jaśniejszy szary */
+        }
+
+        ul {
+    list-style: none; /* Usuwa kropki przy elementach listy */
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #1A1A1A; /* Ciemny szary */
+    border: 1px solid #333333; /* Ciemniejsza granica */
+    border-radius: 4px;
+    cursor: grab;
+    position: relative;
+    list-style: none; /* Dodatkowe zabezpieczenie */
+}
+
+
+        li.dragging {
+            opacity: 0.5;
+        }
+
+        .delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #D9534F; /* Czerwony */
+            color: #FFFFFF; /* Biały tekst */
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .delete:hover {
+            background: #C9302C; /* Ciemniejszy czerwony */
+        }
+
+        .task-info {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .time-details {
+            font-size: 0.9em;
+            color: #bbb; /* Jaśniejszy szary */
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+        }
+
+        .category {
+            flex: 1;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px dashed #B3B3B3; /* Jasny szary */
+            border-radius: 4px;
+            background: #1A1A1A; /* Ciemny szary */
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .category h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #B3B3B3; /* Jasny szary */
+        }
+
+        .category.over {
+            background: #333333; /* Jeszcze ciemniejszy szary */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Zadanka</h1>
+        <div class="tabs">
+            <div class="tab active" data-tab="tab1">Dodawanie</div>
+            <div class="tab" data-tab="tab2">Kategorie (wip)</div>
+        </div>
+
+        <div class="tab-content active" id="tab1">
+            <div class="input-container">
+                <input type="text" id="taskInput" placeholder="Dodaj nowe zadanko">
+                <input type="time" id="startTime">
+                <input type="time" id="endTime">
+                <button onclick="addTask()">Dodaj</button>
+            </div>
+            <ul id="taskList"></ul>
+        </div>
+
+        <div class="tab-content" id="tab2">
+            <ul id="draggableTasks"></ul>
+            <div class="categories">
+                <div class="category" data-category="kategoria1">
+                    <h3>Wpisywacz 1</h3>
+                </div>
+                <div class="category" data-category="kategoria2">
+                    <h3>Wpisywacz 3</h3>
+                </div>
+                <div class="category" data-category="kategoria3">
+                    <h3>Wpisywacz 4</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            updateTaskList(tasks, 'taskList', true);
+            updateTaskList(tasks, 'draggableTasks', false);
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const startTime = document.getElementById('startTime');
+            const endTime = document.getElementById('endTime');
+            const taskText = taskInput.value.trim();
+            const start = startTime.value;
+            const end = endTime.value;
+
+            if (!taskText || !start || !end) {
+                alert("Proszę uzupełnić wszystkie pola!");
+                return;
+            }
+
+            const duration = calculateDuration(start, end);
+            if (!duration) {
+                alert("Czas zakończenia musi być późniejszy niż czas rozpoczęcia!");
+                return;
+            }
+
+            const task = { taskText, start, end, duration };
+            saveTaskToLocalStorage(task);
+            loadTasks();
+        }
+
+        function updateTaskList(tasks, elementId, isOriginal) {
+            const taskList = document.getElementById(elementId);
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const li = createTaskElement(task, isOriginal);
+                taskList.appendChild(li);
+            });
+        }
+
+        function createTaskElement(task, isOriginal) {
+            const { taskText, start, end, duration } = task;
+
+            const li = document.createElement('li');
+            const taskInfo = document.createElement('div');
+            const timeDetails = document.createElement('div');
+
+            taskInfo.textContent = taskText;
+            timeDetails.textContent = `Start: ${start}, Koniec: ${end}, Czas: ${duration}`;
+
+            taskInfo.className = 'task-info';
+            timeDetails.className = 'time-details';
+
+            li.appendChild(taskInfo);
+            li.appendChild(timeDetails);
+
+            if (!isOriginal) {
+                li.draggable = true;
+                li.addEventListener('dragstart', () => li.classList.add('dragging'));
+                li.addEventListener('dragend', () => li.classList.remove('dragging'));
+            } else {
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = "Usuń";
+                deleteButton.className = "delete";
+                deleteButton.addEventListener('click', () => {
+                    deleteTaskFromLocalStorage(task);
+                    loadTasks();
+                });
+                li.appendChild(deleteButton);
+            }
+
+            return li;
+        }
+
+        function calculateDuration(start, end) {
+    const startDate = new Date(`1970-01-01T${start}Z`);
+    const endDate = new Date(`1970-01-01T${end}Z`);
+    const diff = (endDate - startDate) / (1000 * 60); // Różnica w minutach
+
+    if (diff > 0) {
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    return null; // Zwrot null, jeśli czas końcowy jest wcześniejszy niż początkowy
+}
+
+
+        function saveTaskToLocalStorage(task) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function deleteTaskFromLocalStorage(taskToRemove) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const updatedTasks = tasks.filter(task => task.taskText !== taskToRemove.taskText);
+            localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        }
+
+        const categories = document.querySelectorAll('.category');
+
+        categories.forEach(category => {
+            category.addEventListener('dragover', e => {
+                e.preventDefault();
+                category.classList.add('over');
+            });
+
+            category.addEventListener('dragleave', () => {
+                category.classList.remove('over');
+            });
+
+            category.addEventListener('drop', e => {
+                e.preventDefault();
+                const dragging = document.querySelector('.dragging');
+                category.appendChild(dragging);
+                category.classList.remove('over');
+            });
+        });
+    </script>
+</body>
+</html>
